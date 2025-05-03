@@ -1,93 +1,12 @@
-# Alvin's Blog 前端
+# React + Vite
 
-## 项目概述
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-这是一个基于React和Ant Design的个人博客网站前端项目。
+Currently, two official plugins are available:
 
-## 开发计划
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-前端开发将分为以下几个阶段：
+## Expanding the ESLint configuration
 
-1. 项目初始化与基础架构搭建
-   - 使用Create React App或Vite创建项目
-   - 配置路由系统
-   - 设置全局样式和主题
-   - 实现基础布局组件
-
-2. 用户认证界面
-   - 登录页面
-   - 注册页面
-   - 用户信息页面
-
-3. 博客内容展示
-   - 文章列表页
-   - 文章详情页
-   - 分类和标签筛选
-   - 搜索功能
-
-4. 博客管理功能（管理员）
-   - 文章编辑器
-   - 分类和标签管理
-   - 评论管理
-   - 用户管理
-
-5. 响应式设计优化
-   - 移动端适配
-   - 性能优化
-
-## 技术栈
-
-- React: 前端框架
-- React Router: 路由管理
-- Ant Design: UI组件库
-- Axios: HTTP请求
-- Redux/Context API: 状态管理
-- Markdown编辑器: 文章编辑
-
-## 项目结构（计划）
-
-```
-/frontend
-├── public/           # 静态资源
-├── src/              # 源代码
-│   ├── api/          # API请求
-│   ├── assets/       # 图片等资源
-│   ├── components/   # 通用组件
-│   ├── hooks/        # 自定义Hooks
-│   ├── layouts/      # 布局组件
-│   ├── pages/        # 页面组件
-│   ├── store/        # 状态管理
-│   ├── styles/       # 全局样式
-│   ├── utils/        # 工具函数
-│   ├── App.jsx       # 应用入口
-│   ├── index.jsx     # 渲染入口
-│   └── routes.jsx    # 路由配置
-├── .env              # 环境变量
-├── package.json      # 依赖配置
-└── vite.config.js    # Vite配置
-```
-
-## 如何开始
-
-前端项目将在后端API基本完成后开始开发。开发步骤将包括：
-
-1. 初始化React项目
-2. 安装必要的依赖
-3. 配置路由和全局样式
-4. 实现与后端API的连接
-5. 逐步开发各个页面组件
-
-## 设计理念
-
-- 简洁现代的UI设计
-- 良好的用户体验
-- 响应式布局，适配各种设备
-- 高性能和可访问性
-- 良好的SEO优化
-
-## 下一步行动
-
-1. 等待后端API基本功能完成
-2. 初始化前端项目
-3. 开发用户认证相关页面
-4. 实现博客文章展示功能
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
