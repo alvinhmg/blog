@@ -85,9 +85,10 @@ func registerTagRoutes(group *route.RouterGroup) {
 func registerCommentRoutes(group *route.RouterGroup) {
 	comments := group.Group("/comments")
 
-	// TODO: 实现评论控制器
-	comments.GET("/post/:postId", nil) // 获取文章下的评论
-	comments.POST("", nil)             // 创建评论
-	comments.PUT("/:id", nil)          // 更新评论
-	comments.DELETE("/:id", nil)       // 删除评论
+	// 连接评论控制器
+	comments.GET("/post/:postId", api.GetPostComments) // 获取文章下的评论
+	comments.DELETE("/:id", api.DeleteComment)         // 删除评论
+
+	// 文章评论路由
+	group.POST("/posts/:postId/comments", api.AddComment) // 添加评论到指定文章
 }
