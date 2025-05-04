@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Form, Input, Button, Card, Typography, message, Divider } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
+import { authAPI } from '../api'; // 确保导入authAPI
 
 const { Title, Paragraph } = Typography;
 
@@ -12,17 +13,14 @@ const RegisterPage = () => {
   const onFinish = async (values) => {
     try {
       setLoading(true);
-      // 这里将来会实现实际的注册API调用
-      console.log('注册信息:', values);
-      
-      // 模拟注册成功
-      setTimeout(() => {
-        message.success('注册成功！请登录');
-        navigate('/login');
-        setLoading(false);
-      }, 1000);
+      // 实际调用注册API
+      const { username, email, password, nickname } = values;
+      await authAPI.register({ username, email, password, nickname });
+      message.success('注册成功！请登录');
+      navigate('/login');
+      setLoading(false);
     } catch (error) {
-      message.error('注册失败，请稍后再试');
+      message.error(error?.response?.data?.message || '注册失败，请稍后再试');
       setLoading(false);
     }
   };
