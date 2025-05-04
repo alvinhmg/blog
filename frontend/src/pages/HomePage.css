@@ -1,0 +1,106 @@
+.home-page-container {
+  padding: 0; /* Remove default padding if any */
+  max-width: 100%; /* Allow full width */
+}
+
+/* Hero Section Styles */
+.hero-section {
+  background-color: #f0f2f5; /* Light grey background */
+  padding: 4rem 2rem;
+  margin-bottom: 2rem; /* Add space below hero */
+  text-align: center;
+}
+
+.hero-title {
+  margin-bottom: 1rem;
+  color: #1f1f1f; /* Darker text color */
+  font-weight: 600;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  color: #595959; /* Slightly lighter text */
+  margin-bottom: 2rem;
+}
+
+.hero-button .ant-btn-primary {
+  background-color: #1890ff; /* Ant Design primary blue */
+  border-color: #1890ff;
+}
+
+.hero-button .ant-btn-primary:hover {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
+}
+
+/* Latest Posts Section Styles */
+.latest-posts-section {
+  padding: 2rem 1rem; /* Add padding around the posts */
+}
+
+.latest-posts-section .ant-typography {
+  color: #333; /* Consistent text color */
+}
+
+/* Post Card Styles */
+.post-card {
+  border: 1px solid #e8e8e8; /* Lighter border */
+  border-radius: 8px; /* Rounded corners */
+  transition: box-shadow 0.3s ease;
+  height: 100%; /* Ensure cards in a row have same height */
+  display: flex;
+  flex-direction: column;
+}
+
+.post-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.post-card .ant-card-head {
+  border-bottom: 1px solid #f0f0f0; /* Lighter head border */
+  padding: 0 24px;
+}
+
+.post-card .ant-card-body {
+  padding: 24px;
+  flex-grow: 1; /* Allow body to grow */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Push date to bottom */
+}
+
+.post-card-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #1f1f1f;
+}
+
+.post-card-title:hover {
+  color: #1890ff;
+}
+
+.post-card-summary {
+  color: #595959;
+  margin-bottom: 1rem; /* Space between summary and date */
+}
+
+.post-card .ant-typography-secondary {
+  font-size: 0.85rem;
+  margin-top: auto; /* Push date to the bottom */
+}
+
+/* Adjust global styles if needed */
+#root {
+  padding: 0; /* Remove global padding */
+  max-width: none; /* Remove max-width constraint */
+  text-align: left; /* Reset global text alignment */
+}
+
+body {
+  place-items: normal; /* Reset body centering */
+}
+
+/* Ensure Divider has appropriate margin */
+.ant-divider-horizontal {
+  margin: 32px 0;
+}

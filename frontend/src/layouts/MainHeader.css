@@ -1,0 +1,31 @@
+.header {
+  display: flex;
+  align-items: center;
+  padding: 0 20px; /* Add some padding */
+}
+
+.logo {
+  margin-right: 24px; /* Add space between logo and menu */
+  /* Adjust logo link styles if needed */
+}
+
+.logo a {
+  color: white; /* Ensure logo text is visible */
+  font-size: 1.2em; /* Adjust font size if needed */
+  font-weight: bold;
+}
+
+.header .ant-menu {
+  line-height: 64px; /* Match header height */
+  flex: 1; /* Allow menu to take available space */
+  border-bottom: none; /* Remove default border */
+}
+
+.header .ant-space {
+  margin-left: auto; /* Push the login button to the right */
+}
+
+/* Remove shadow from the primary login button in the header */
+.header .ant-space .ant-btn-primary {
+  box-shadow: none;
+}

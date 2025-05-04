@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -15,20 +16,21 @@ import (
 
 // JWTAuth JWT认证中间件
 func JWTAuth() app.HandlerFunc {
-	return func(ctx *app.RequestContext) {
+	return func(c context.Context, ctx *app.RequestContext) {
 		// 从请求头获取token
-		tokenString := ctx.GetHeader("Authorization")
+		tokenString := string(ctx.GetHeader("Authorization"))
 		if tokenString == "" {
 			ctx.JSON(consts.StatusUnauthorized, map[string]interface{}{
 				"code":    401,
 				"message": "未提供认证令牌",
+				"data":    nil,
 			})
 			ctx.Abort()
 			return
 		}
 
 		// 移除Bearer前缀
-		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
 		// 解析JWT令牌
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -45,40 +47,54 @@ func JWTAuth() app.HandlerFunc {
 				"code":    401,
 				"message": "无效的认证令牌",
 				"error":   err.Error(),
+				"data":    nil,
 			})
 			ctx.Abort()
 			return
 		}
 
 		// 验证令牌有效性
-		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			// 获取用户ID
-			userID := uint(claims["user_id"].(float64))
-
-			// 查询用户信息
-			var user models.User
-			result := config.DB.First(&user, userID)
-			if result.Error != nil {
-				ctx.JSON(consts.StatusUnauthorized, map[string]interface{}{
-					"code":    401,
-					"message": "用户不存在",
-				})
-				ctx.Abort()
-				return
-			}
-
-			// 将用户信息存储到上下文中
-			ctx.Set("user", user)
-			ctx.Set("user_id", userID)
-			ctx.Next()
-		} else {
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok || !token.Valid {
 			ctx.JSON(consts.StatusUnauthorized, map[string]interface{}{
 				"code":    401,
 				"message": "无效的认证令牌",
+				"data":    nil,
 			})
 			ctx.Abort()
 			return
 		}
+
+		// 获取用户ID
+		userIDFloat, ok := claims["user_id"].(float64)
+		if !ok {
+			ctx.JSON(consts.StatusUnauthorized, map[string]interface{}{
+				"code":    401,
+				"message": "无效的用户ID",
+				"data":    nil,
+			})
+			ctx.Abort()
+			return
+		}
+		userID := uint(userIDFloat)
+
+		// 查询用户信息
+		var user models.User
+		result := config.DB.First(&user, userID)
+		if result.Error != nil {
+			ctx.JSON(consts.StatusUnauthorized, map[string]interface{}{
+				"code":    401,
+				"message": "用户不存在",
+				"data":    nil,
+			})
+			ctx.Abort()
+			return
+		}
+
+		// 将用户信息存储到上下文中
+		ctx.Set("user", user)
+		ctx.Set("userID", userID)
+		ctx.Next(c)
 	}
 }
 
@@ -106,28 +122,42 @@ func GenerateToken(user models.User) (string, error) {
 
 // AdminAuth 管理员权限中间件
 func AdminAuth() app.HandlerFunc {
-	return func(ctx *app.RequestContext) {
+	return func(c context.Context, ctx *app.RequestContext) {
 		// 获取用户信息
-		user, exists := ctx.Get("user")
+		userInterface, exists := ctx.Get("user")
 		if !exists {
 			ctx.JSON(consts.StatusUnauthorized, map[string]interface{}{
 				"code":    401,
 				"message": "未认证",
+				"data":    nil,
+			})
+			ctx.Abort()
+			return
+		}
+
+		// 类型断言
+		user, ok := userInterface.(models.User)
+		if !ok {
+			ctx.JSON(consts.StatusInternalServerError, map[string]interface{}{
+				"code":    500,
+				"message": "用户信息类型错误",
+				"data":    nil,
 			})
 			ctx.Abort()
 			return
 		}
 
 		// 检查用户角色
-		if user.(models.User).Role != "admin" {
+		if user.Role != "admin" {
 			ctx.JSON(consts.StatusForbidden, map[string]interface{}{
 				"code":    403,
 				"message": "权限不足",
+				"data":    nil,
 			})
 			ctx.Abort()
 			return
 		}
 
-		ctx.Next()
+		ctx.Next(c)
 	}
 }

@@ -1,8 +1,9 @@
-import { Typography, Row, Col, Card, Space, Button } from 'antd';
+import { Typography, Row, Col, Card, Space, Button, Divider } from 'antd';
 import { ReadOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
+import './HomePage.css'; // 引入自定义 CSS
 
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph, Text } = Typography;
 
 const HomePage = () => {
   // 这里将来会从API获取最新文章
@@ -13,34 +14,37 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="home-container" style={{ padding: '2rem' }}>
-      <Row gutter={[24, 24]}>
-        <Col span={24}>
-          <div className="hero-section" style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <Title>欢迎来到Alvin的博客</Title>
-            <Paragraph>
-              这是一个分享技术、思考和创意的个人空间。
-            </Paragraph>
-            <Button type="primary" size="large" icon={<ReadOutlined />}>
-              <Link to="/posts">浏览文章</Link>
-            </Button>
-          </div>
+    <div className="home-page-container">
+      {/* Hero Section */}
+      <Row justify="center" align="middle" className="hero-section">
+        <Col span={24} style={{ textAlign: 'center' }}>
+          <Title level={1} className="hero-title">欢迎来到 Alvin 的博客</Title>
+          <Paragraph className="hero-subtitle">
+            这是一个分享技术、思考和创意的个人空间。
+          </Paragraph>
+          <Button type="primary" size="large" icon={<ReadOutlined />} className="hero-button">
+            <Link to="/posts" style={{ color: 'inherit', textDecoration: 'none' }}>浏览文章</Link>
+          </Button>
         </Col>
+      </Row>
 
-        <Col span={24}>
-          <Title level={2}>最新文章</Title>
-          <Row gutter={[16, 16]}>
+      <Divider />
+
+      {/* Latest Posts Section */}
+      <Row justify="center" className="latest-posts-section">
+        <Col xs={24} lg={20} xl={18}>
+          <Title level={2} style={{ textAlign: 'center', marginBottom: '2rem' }}>最新文章</Title>
+          <Row gutter={[24, 24]}>
             {latestPosts.map(post => (
               <Col xs={24} sm={12} md={8} key={post.id}>
-                <Card 
-                  hoverable 
-                  title={post.title}
+                <Card
+                  hoverable
+                  className="post-card"
+                  title={<Link to={`/posts/${post.id}`} className="post-card-title">{post.title}</Link>}
                   extra={<Link to={`/posts/${post.id}`}>阅读更多</Link>}
                 >
-                  <Paragraph ellipsis={{ rows: 3 }}>{post.summary}</Paragraph>
-                  <Space>
-                    <span>发布于: {post.createdAt}</span>
-                  </Space>
+                  <Paragraph ellipsis={{ rows: 3 }} className="post-card-summary">{post.summary}</Paragraph>
+                  <Text type="secondary">发布于: {post.createdAt}</Text>
                 </Card>
               </Col>
             ))}

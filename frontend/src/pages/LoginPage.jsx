@@ -2,27 +2,44 @@ import { useState } from 'react';
 import { Form, Input, Button, Card, Typography, message, Divider } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../store/AuthContext'; // Import useAuth
 
 const { Title, Paragraph } = Typography;
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const auth = useAuth(); // Get auth context
 
   const onFinish = async (values) => {
     try {
       setLoading(true);
-      // 这里将来会实现实际的登录API调用
-      console.log('登录信息:', values);
+      // Call the actual login API
+      const response = await fetch('/api/auth/login', { // Assuming backend runs on the same origin or proxy is set up
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || '登录失败');
+      }
+
+      const userData = await response.json(); // Assuming API returns user data (e.g., { user: {...}, token: '...' })
       
-      // 模拟登录成功
-      setTimeout(() => {
-        message.success('登录成功！');
-        navigate('/');
-        setLoading(false);
-      }, 1000);
+      // Call auth.login to update global state and store user info
+      auth.login(userData.user); // Store user details from response
+
+      message.success('登录成功！');
+      navigate('/'); // Redirect to home page after successful login
+
     } catch (error) {
-      message.error('登录失败，请检查用户名和密码');
+      console.error('Login failed:', error);
+      message.error(error.message || '登录失败，请检查用户名和密码');
+    } finally {
       setLoading(false);
     }
   };
@@ -38,7 +55,7 @@ const LoginPage = () => {
           layout="vertical"
         >
           <Form.Item
-            name="username"
+            name="username" // Changed from email/username to just username based on API doc
             rules={[{ required: true, message: '请输入用户名!' }]}
           >
             <Input prefix={<UserOutlined />} placeholder="用户名" size="large" />

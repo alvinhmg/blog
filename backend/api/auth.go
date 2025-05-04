@@ -1,6 +1,9 @@
 package api
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/alvinhmg/blog/config"
 	"github.com/alvinhmg/blog/middleware"
 	"github.com/alvinhmg/blog/models"
@@ -24,7 +27,8 @@ type LoginRequest struct {
 }
 
 // Register 用户注册
-func Register(ctx *app.RequestContext) {
+func Register(c context.Context, ctx *app.RequestContext) {
+	// 解析请求体
 	var req RegisterRequest
 	if err := ctx.BindAndValidate(&req); err != nil {
 		ctx.JSON(consts.StatusBadRequest, map[string]interface{}{
@@ -116,7 +120,8 @@ func Register(ctx *app.RequestContext) {
 }
 
 // Login 用户登录
-func Login(ctx *app.RequestContext) {
+func Login(c context.Context, ctx *app.RequestContext) {
+	// 解析请求体
 	var req LoginRequest
 	if err := ctx.BindAndValidate(&req); err != nil {
 		ctx.JSON(consts.StatusBadRequest, map[string]interface{}{
@@ -176,11 +181,12 @@ func Login(ctx *app.RequestContext) {
 	})
 }
 
-// Logout 用户登出
-func Logout(ctx *app.RequestContext) {
-	// 由于使用JWT，服务端不需要做特殊处理，客户端只需要删除本地存储的令牌即可
-	ctx.JSON(consts.StatusOK, map[string]interface{}{
-		"code":    200,
+// Logout 用户登出 (简单实现，实际可能需要处理token黑名单等)
+func Logout(c context.Context, ctx *app.RequestContext) {
+	// 理论上，JWT是无状态的，登出主要由客户端删除token实现
+	// 服务端可以实现token黑名单机制来强制登出
+	ctx.JSON(http.StatusOK, map[string]interface{}{
+		"code":    0,
 		"message": "登出成功",
 	})
 }

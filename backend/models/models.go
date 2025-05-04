@@ -80,4 +80,5 @@ type Comment struct {
 	ParentID  *uint          `json:"parent_id"` // 父评论ID，用于回复功能
 	Parent    *Comment       `gorm:"foreignKey:ParentID" json:"-"`
 	Replies   []Comment      `gorm:"foreignKey:ParentID" json:"replies"`
+	Status    string         `gorm:"size:20;default:'pending'" json:"status"` // pending, approved, rejected
 }

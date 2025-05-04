@@ -5,9 +5,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import PostListPage from './pages/PostListPage';
 import PostDetailPage from './pages/PostDetailPage';
-import UserProfilePage from './pages/UserProfilePage';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import PostEditor from './pages/admin/PostEditor';
+import MainPage from './pages/admin/MainPage'; // Corrected import
 
 const router = createBrowserRouter([
   {
@@ -19,10 +17,8 @@ const router = createBrowserRouter([
       { path: 'register', element: <RegisterPage /> },
       { path: 'posts', element: <PostListPage /> },
       { path: 'posts/:id', element: <PostDetailPage /> },
-      { path: 'profile', element: <UserProfilePage /> },
-      { path: 'admin', element: <AdminDashboard /> },
-      { path: 'admin/posts/edit/:id', element: <PostEditor /> },
-      { path: 'admin/posts/new', element: <PostEditor /> },
+      { path: 'admin', element: <MainPage /> }, // Corrected component
+      // Removed routes for non-existent PostEditor
     ],
   },
 ]);

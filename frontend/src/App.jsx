@@ -23,7 +23,6 @@ function App() {
       </Layout>
     </ConfigProvider>
   )
-  )
 }
 
 export default App

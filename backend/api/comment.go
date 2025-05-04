@@ -1,6 +1,9 @@
 package api
 
 import (
+	"context"
+	"strconv"
+
 	"github.com/alvinhmg/blog/config"
 	"github.com/alvinhmg/blog/models"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -8,13 +11,13 @@ import (
 )
 
 // GetPostComments 获取文章评论列表
-func GetPostComments(ctx *app.RequestContext) {
+func GetPostComments(c context.Context, ctx *app.RequestContext) {
 	// 获取文章ID
 	postID := ctx.Param("postId")
 
-	// 查询评论列表
+	// 查询评论列表（只返回已审核通过的评论）
 	var comments []models.Comment
-	result := config.DB.Where("post_id = ?", postID).Preload("User").Order("created_at DESC").Find(&comments)
+	result := config.DB.Where("post_id = ? AND (status = 'approved' OR status IS NULL)", postID).Preload("User").Order("created_at DESC").Find(&comments)
 	if result.Error != nil {
 		ctx.JSON(consts.StatusInternalServerError, map[string]interface{}{
 			"code":    500,
@@ -33,9 +36,18 @@ func GetPostComments(ctx *app.RequestContext) {
 }
 
 // AddComment 添加评论
-func AddComment(ctx *app.RequestContext) {
+func AddComment(c context.Context, ctx *app.RequestContext) {
 	// 获取文章ID
-	postID := ctx.Param("postId")
+	postIDStr := ctx.Param("postId")
+	postID, err := strconv.ParseUint(postIDStr, 10, 64)
+	if err != nil {
+		ctx.JSON(consts.StatusBadRequest, map[string]interface{}{
+			"code":    400,
+			"message": "无效的文章ID",
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	// 获取当前用户ID
 	userID, exists := ctx.Get("userID")
@@ -49,7 +61,8 @@ func AddComment(ctx *app.RequestContext) {
 
 	// 解析请求体
 	type CommentRequest struct {
-		Content string `json:"content"`
+		Content  string `json:"content"`
+		ParentID *uint  `json:"parent_id,omitempty"` // 可选的父评论ID
 	}
 	var req CommentRequest
 	if err := ctx.BindJSON(&req); err != nil {
@@ -70,11 +83,23 @@ func AddComment(ctx *app.RequestContext) {
 		return
 	}
 
+	// 检查用户角色
+	var user models.User
+	config.DB.First(&user, userID)
+
 	// 创建评论
 	comment := models.Comment{
-		Content: req.Content,
-		PostID:  uint(ctx.ParamInt64("postId")),
-		UserID:  uint(userID.(uint)),
+		Content:  req.Content,
+		PostID:   uint(postID),
+		UserID:   uint(userID.(uint)),
+		ParentID: req.ParentID,
+	}
+
+	// 管理员发表的评论自动通过审核
+	if user.Role == "admin" {
+		comment.Status = "approved"
+	} else {
+		comment.Status = "pending" // 普通用户评论需要审核
 	}
 
 	// 保存评论
@@ -92,19 +117,32 @@ func AddComment(ctx *app.RequestContext) {
 	config.DB.Preload("User").First(&comment, comment.ID)
 
 	// 返回评论信息
+	message := "评论已提交，等待审核"
+	if user.Role == "admin" {
+		message = "评论已发布"
+	}
 	ctx.JSON(consts.StatusOK, map[string]interface{}{
 		"code":    200,
-		"message": "添加评论成功",
+		"message": message,
 		"data":    comment,
 	})
 }
 
-// DeleteComment 删除评论
-func DeleteComment(ctx *app.RequestContext) {
+// DeleteComment 删除评论 (需要权限检查: 评论作者或管理员)
+func DeleteComment(c context.Context, ctx *app.RequestContext) {
 	// 获取评论ID
-	commentID := ctx.Param("id")
+	commentIDStr := ctx.Param("id")
+	commentID, err := strconv.ParseUint(commentIDStr, 10, 64)
+	if err != nil {
+		ctx.JSON(consts.StatusBadRequest, map[string]interface{}{
+			"code":    400,
+			"message": "无效的评论ID",
+			"error":   err.Error(),
+		})
+		return
+	}
 
-	// 获取当前用户ID
+	// 获取当前用户ID和角色
 	userID, exists := ctx.Get("userID")
 	if !exists {
 		ctx.JSON(consts.StatusUnauthorized, map[string]interface{}{
