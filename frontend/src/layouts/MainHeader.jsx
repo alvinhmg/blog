@@ -2,26 +2,27 @@ import { Layout, Menu, Button, Space } from 'antd';
 import './MainHeader.css'; // 导入自定义样式
 import { UserOutlined, HomeOutlined, ReadOutlined, LoginOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../store/AuthContext'; // Import useAuth
+import { useSelector, useDispatch } from 'react-redux'; // Import useSelector and useDispatch
+import { logout } from '../store/authSlice'; // Import logout action
 
 const { Header } = Layout;
 
 const MainHeader = () => {
   const navigate = useNavigate();
-  const { user, logout, loading } = useAuth(); // Get user, logout function, and loading state from context
-  // const isLoggedIn = false; // Replaced by user state from context
-  const isAdmin = user?.role === 'admin'; // Example: Check if user has admin role
+  const dispatch = useDispatch(); // Get dispatch function
+  const { user, isAuthenticated } = useSelector((state) => state.auth); // Get user and isAuthenticated from Redux store
+  const isAdmin = user?.role === 'admin'; // Check if user has admin role
 
   const handleLogout = () => {
-    logout(); // Call logout from context
+    dispatch(logout()); // Dispatch logout action
     console.log('用户登出');
     navigate('/login');
   };
 
-  // Don't render header content until auth state is loaded
-  if (loading) {
-    return <Header className="header"></Header>; // Or a loading indicator
-  }
+  // No need for loading state from context anymore
+  // if (loading) {
+  //   return <Header className="header"></Header>; // Or a loading indicator
+  // }
 
   return (
     <Header className="header">
@@ -40,19 +41,16 @@ const MainHeader = () => {
         ].filter(Boolean)}
       />
       <Space>
-        {user ? ( // Check if user object exists
+        {isAuthenticated && user ? ( // Check isAuthenticated and user from Redux
           <>
             <span style={{ color: 'white', marginRight: '10px' }}>欢迎, {user.nickname || user.username}</span>
-            {/* <Button type="link" icon={<UserOutlined />} onClick={() => navigate('/profile')}>
-              个人中心
-            </Button> */}
             <Button type="link" icon={<LogoutOutlined />} onClick={handleLogout}>
               登出
             </Button>
           </>
         ) : (
           <Button type="primary" icon={<LoginOutlined />} onClick={() => navigate('/login')}>
-            登录
+            登录/注册
           </Button>
         )}
       </Space>

@@ -1,44 +1,34 @@
-import { useState } from 'react';
-import { Form, Input, Button, Card, Typography, message, Divider } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../store/AuthContext'; // Import useAuth
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../store/authSlice';
+import { Button, Form, Input, message, Card, Typography, Divider } from 'antd';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { authAPI } from '../api';
 
 const { Title, Paragraph } = Typography;
 
-const LoginPage = () => {
-  const [loading, setLoading] = useState(false);
+const Login = () => {
   const navigate = useNavigate();
-  const auth = useAuth(); // Get auth context
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
 
   const onFinish = async (values) => {
     try {
       setLoading(true);
-      // Call the actual login API
-      const response = await fetch('/api/auth/login', { // Assuming backend runs on the same origin or proxy is set up
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || '登录失败');
-      }
-
-      const userData = await response.json(); // Assuming API returns user data (e.g., { user: {...}, token: '...' })
+      const response = await authAPI.login(values.username, values.password);
       
-      // Call auth.login to update global state and store user info
-      auth.login(userData.user); // Store user details from response
-
-      message.success('登录成功！');
-      navigate('/'); // Redirect to home page after successful login
-
+      if (response.code === 200) {
+        const { user, token } = response.data;
+        localStorage.setItem('token', token);
+        dispatch(setCredentials({ user, token }));
+        message.success('登录成功');
+        navigate('/');
+      } else {
+        message.error(response.message || '登录失败');
+      }
     } catch (error) {
-      console.error('Login failed:', error);
-      message.error(error.message || '登录失败，请检查用户名和密码');
+      message.error(error.response?.data?.message || '登录失败');
     } finally {
       setLoading(false);
     }
@@ -50,12 +40,12 @@ const LoginPage = () => {
         <Title level={2} style={{ textAlign: 'center' }}>用户登录</Title>
         <Form
           name="login"
-          initialValues={{ remember: true }}
           onFinish={onFinish}
           layout="vertical"
+          autoComplete="off"
         >
           <Form.Item
-            name="username" // Changed from email/username to just username based on API doc
+            name="username"
             rules={[{ required: true, message: '请输入用户名!' }]}
           >
             <Input prefix={<UserOutlined />} placeholder="用户名" size="large" />
@@ -89,4 +79,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default Login;
