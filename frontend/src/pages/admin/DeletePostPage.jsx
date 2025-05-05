@@ -16,24 +16,26 @@ const DeletePostPage = () => {
       setLoading(true);
       // 添加查询参数以确保获取所有文章
       const response = await postAPI.getAllPosts({limit: 100});
-      console.log('获取到的文章数据:', response);
-      
-      // 更健壮的数据处理
+      console.log('API响应 (经过拦截器处理后):', response);
+
+      // 根据网络请求截图，数据在 response.data.posts 中
       let postsArray = [];
-      if (Array.isArray(response)) {
-        postsArray = response;
-      } else if (response && typeof response === 'object') {
-        if (Array.isArray(response.data)) {
-          postsArray = response.data;
-        } else if (response.posts && Array.isArray(response.posts)) {
-          postsArray = response.posts;
+      if (response && response.data && Array.isArray(response.data.posts)) {
+        postsArray = response.data.posts;
+      } else {
+        console.warn('未识别的文章数据结构或数据为空:', response);
+        // 如果 postsArray 仍然为空，可以给用户一个更友好的提示
+        if (postsArray.length === 0) {
+            message.info('暂无文章数据');
+        } else {
+            message.warn('获取到的文章数据格式不正确，请检查API响应');
         }
       }
-      
+
       // 确保每个post对象都有唯一的key
       const postsWithKeys = postsArray.map(post => ({
         ...post,
-        key: post.id || Math.random().toString(36).substr(2, 9)
+        key: post.id || `fallback-${Math.random().toString(36).substr(2, 9)}` // 添加前缀避免潜在冲突
       }));
       
       console.log('处理后的文章数据:', postsWithKeys);
