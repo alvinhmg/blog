@@ -5,7 +5,12 @@ import Login from './pages/Login';
 import RegisterPage from './pages/RegisterPage';
 import PostListPage from './pages/PostListPage';
 import PostDetailPage from './pages/PostDetailPage';
-import MainPage from './pages/admin/MainPage'; // Corrected import
+import MainPage from './pages/admin/MainPage';
+import CreatePostPage from './pages/admin/CreatePostPage';
+import UpdatePostPage from './pages/admin/UpdatePostPage';
+import DeletePostPage from './pages/admin/DeletePostPage';
+import CategoryManagementPage from './pages/admin/CategoryManagementPage';
+import TagManagementPage from './pages/admin/TagManagementPage';
 
 const router = createBrowserRouter([
   {
@@ -17,8 +22,12 @@ const router = createBrowserRouter([
       { path: 'register', element: <RegisterPage /> },
       { path: 'posts', element: <PostListPage /> },
       { path: 'posts/:id', element: <PostDetailPage /> },
-      { path: 'admin', element: <MainPage /> }, // Corrected component
-      // Removed routes for non-existent PostEditor
+      { path: 'admin', element: <MainPage /> },
+      { path: 'admin/create-post', element: <CreatePostPage /> },
+      { path: 'admin/update-post/:id', element: <UpdatePostPage /> },
+      { path: 'admin/delete-post', element: <DeletePostPage /> },
+      { path: 'admin/category-management', element: <CategoryManagementPage /> },
+      { path: 'admin/tag-management', element: <TagManagementPage /> },
     ],
   },
 ]);

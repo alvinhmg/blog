@@ -48,8 +48,8 @@ const MainHeader = () => {
         style={{ flex: 1, minWidth: 0 }}
         items={[
           { key: 'home', icon: <HomeOutlined />, label: <Link to="/">首页</Link> },
-          { key: 'posts', icon: <ReadOutlined />, label: <Link to="/posts">文章</Link> },
-          isAdmin ? { key: 'admin', icon: <UserOutlined />, label: <Link to="/admin">管理</Link> } : null,
+          { key: 'posts', icon: <ReadOutlined />, label: <Link to="/posts">文章列表</Link> },
+          isAdmin ? { key: 'admin', icon: <UserOutlined />, label: <Link to="/admin">管理页面</Link> } : null,
         ].filter(Boolean)}
       />
       <Space>

@@ -1,38 +1,138 @@
 import React, { useState } from 'react';
+import { Form, Input, Button, Select, message, Typography, Card, Space, Divider } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { postAPI } from '../../api';
+
+const { Title } = Typography;
+const { TextArea } = Input;
+const { Option } = Select;
 
 const CreatePostPage = () => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [category, setCategory] = useState('');
-  const [tags, setTags] = useState('');
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    fetch('/api/posts', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ title, content, category, tags }),
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          console.log('Post created successfully');
-        }
-      });
+  // 这里应该从API获取分类和标签列表
+  const categories = [
+    { id: 1, name: '技术' },
+    { id: 2, name: '生活' },
+    { id: 3, name: '思考' },
+  ];
+
+  const tags = [
+    { id: 1, name: 'React' },
+    { id: 2, name: 'JavaScript' },
+    { id: 3, name: '前端' },
+    { id: 4, name: '后端' },
+  ];
+
+  const handleSubmit = async (values) => {
+    try {
+      setLoading(true);
+      // 处理标签和分类的格式
+      const postData = {
+        title: values.title,
+        content: values.content,
+        excerpt: values.excerpt || values.content.substring(0, 150),
+        status: 'published',
+        categories: values.categories,
+        tags: values.tags,
+      };
+
+      const response = await postAPI.createPost(postData);
+      message.success('文章创建成功！');
+      navigate('/admin');
+    } catch (error) {
+      console.error('创建文章失败:', error);
+      message.error(error.response?.data?.message || '创建文章失败，请稍后重试');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div>
-      <h1>创建文章</h1>
-      <form onSubmit={handleSubmit}>
-        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="标题" required />
-        <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="内容" required />
-        <input type="text" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="分类" />
-        <input type="text" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="标签" />
-        <button type="submit">创建</button>
-      </form>
+    <div style={{ padding: '20px' }}>
+      <Card>
+        <Title level={2}>创建新文章</Title>
+        <Divider />
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          initialValues={{ status: 'published' }}
+        >
+          <Form.Item
+            name="title"
+            label="文章标题"
+            rules={[{ required: true, message: '请输入文章标题' }]}
+          >
+            <Input placeholder="请输入文章标题" />
+          </Form.Item>
+
+          <Form.Item
+            name="excerpt"
+            label="文章摘要"
+            extra="如不填写，将自动截取正文前150个字符"
+          >
+            <TextArea 
+              placeholder="请输入文章摘要" 
+              autoSize={{ minRows: 2, maxRows: 4 }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="content"
+            label="文章内容"
+            rules={[{ required: true, message: '请输入文章内容' }]}
+          >
+            <TextArea 
+              placeholder="请输入文章内容，支持Markdown格式" 
+              autoSize={{ minRows: 10, maxRows: 20 }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="categories"
+            label="文章分类"
+          >
+            <Select
+              mode="multiple"
+              placeholder="请选择文章分类"
+              style={{ width: '100%' }}
+            >
+              {categories.map(category => (
+                <Option key={category.id} value={category.id}>{category.name}</Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="tags"
+            label="文章标签"
+          >
+            <Select
+              mode="multiple"
+              placeholder="请选择文章标签"
+              style={{ width: '100%' }}
+            >
+              {tags.map(tag => (
+                <Option key={tag.id} value={tag.id}>{tag.name}</Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                发布文章
+              </Button>
+              <Button onClick={() => navigate('/admin')}>
+                取消
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Card>
     </div>
   );
 };

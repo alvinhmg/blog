@@ -69,4 +69,22 @@ export const postAPI = {
   deleteComment: (commentId) => api.delete(`/comments/${commentId}`),
 };
 
+// 分类相关API
+export const categoryAPI = {
+  getAllCategories: () => api.get('/categories'),
+  getCategoryById: (id) => api.get(`/categories/${id}`),
+  createCategory: (categoryData) => api.post('/categories', categoryData),
+  updateCategory: (id, categoryData) => api.put(`/categories/${id}`, categoryData),
+  deleteCategory: (id) => api.delete(`/categories/${id}`),
+};
+
+// 标签相关API
+export const tagAPI = {
+  getAllTags: () => api.get('/tags'),
+  getTagById: (id) => api.get(`/tags/${id}`),
+  createTag: (tagData) => api.post('/tags', tagData),
+  updateTag: (id, tagData) => api.put(`/tags/${id}`, tagData),
+  deleteTag: (id) => api.delete(`/tags/${id}`),
+};
+
 export default api;
