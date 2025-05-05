@@ -71,6 +71,7 @@ export const postAPI = {
 
 // 分类相关API
 export const categoryAPI = {
+  getHotCategories: (params) => api.get('/categories/hot', { params }), // 添加获取热门分类
   getAllCategories: () => api.get('/categories'),
   getCategoryById: (id) => api.get(`/categories/${id}`),
   createCategory: (categoryData) => api.post('/categories', categoryData),
@@ -80,6 +81,7 @@ export const categoryAPI = {
 
 // 标签相关API
 export const tagAPI = {
+  getHotTags: (params) => api.get('/tags/hot', { params }), // 添加获取热门标签
   getAllTags: () => api.get('/tags'),
   getTagById: (id) => api.get(`/tags/${id}`),
   createTag: (tagData) => api.post('/tags', tagData),
@@ -87,4 +89,10 @@ export const tagAPI = {
   deleteTag: (id) => api.delete(`/tags/${id}`),
 };
 
-export default api;
+// 杂项 API (首页、归档等)
+export const miscAPI = {
+  getHomePageData: () => api.get('/home'),
+  getArchiveData: () => api.get('/archive'),
+};
+
+// export default api; // 通常不需要默认导出整个实例，除非有特殊用途

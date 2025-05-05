@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Typography, Card, Tag, Space, Divider, Spin, Button, Form, Input, List, Avatar, message } from 'antd';
-import { ArrowLeftOutlined, CalendarOutlined, UserOutlined, CommentOutlined, SendOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, CalendarOutlined, UserOutlined, CommentOutlined, SendOutlined, LikeOutlined, LikeFilled } from '@ant-design/icons'; // Import Like icons
 import ReactMarkdown from 'react-markdown';
 import { postAPI } from '../api';
 
@@ -13,6 +13,9 @@ const PostDetailPage = () => {
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const [liked, setLiked] = useState(false); // State for like status
+  const [likeCount, setLikeCount] = useState(0); // State for like count
+  const [liking, setLiking] = useState(false); // State for like action loading
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -25,6 +28,9 @@ const PostDetailPage = () => {
         if (response.code === 200 && response.data) {
           setPost(response.data);
           setComments(response.data.comments || []);
+          setLikeCount(response.data.like_count || 0); // Assuming backend provides like_count
+          // TODO: Check if current user has liked this post (requires user info and backend logic)
+          // setLiked(response.data.user_has_liked || false);
         } else {
           message.error('获取文章详情失败');
         }
@@ -65,6 +71,34 @@ const PostDetailPage = () => {
     }
   };
 
+  // 处理点赞
+  const handleLike = async () => {
+    setLiking(true);
+    try {
+      // TODO: Implement actual API call for liking/unliking
+      // const response = await postAPI.toggleLikePost(id);
+      // if (response.code === 200) {
+      //   setLiked(!liked);
+      //   setLikeCount(liked ? likeCount - 1 : likeCount + 1);
+      //   message.success(liked ? '取消点赞成功' : '点赞成功');
+      // } else {
+      //   message.error('操作失败');
+      // }
+
+      // Placeholder logic:
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
+      setLiked(!liked);
+      setLikeCount(liked ? likeCount - 1 : likeCount + 1);
+      message.success(liked ? '取消点赞成功 (模拟)' : '点赞成功 (模拟)');
+
+    } catch (error) {
+      console.error('点赞/取消点赞失败:', error);
+      message.error('操作失败，请稍后再试');
+    } finally {
+      setLiking(false);
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
@@ -93,23 +127,36 @@ const PostDetailPage = () => {
       <Card bordered={false}>
         <Title>{post.title}</Title>
         
-        <Space split="|" style={{ marginBottom: '16px' }}>
-          <span><CalendarOutlined /> {post.createdAt}</span>
-          <span><UserOutlined /> {post.author?.username || post.author}</span>
+        <Space split="|" style={{ marginBottom: '16px', color: 'rgba(0, 0, 0, 0.45)' }}>
+          <span><CalendarOutlined style={{ marginRight: '4px' }} />{new Date(post.created_at).toLocaleDateString('zh-CN')}</span>
+          <span><UserOutlined style={{ marginRight: '4px' }} />{post.author?.username || '未知作者'}</span>
         </Space>
         
-        <Space style={{ marginBottom: '24px' }}>
+        <Space wrap style={{ marginBottom: '24px' }}>
           {post.tags && post.tags.map(tag => (
-            <Tag key={typeof tag === 'object' ? tag.id : tag} color="blue">
-              {typeof tag === 'object' ? tag.name : tag}
+            <Tag key={tag.id || tag.name} color="blue">
+              {tag.name}
             </Tag>
           ))}
         </Space>
         
         <Divider />
         
-        <div className="markdown-content">
+        <div className="markdown-content" style={{ marginBottom: '24px' }}>
           <ReactMarkdown>{post.content}</ReactMarkdown>
+        </div>
+
+        {/* Like Button */}
+        <div style={{ marginBottom: '24px', textAlign: 'center' }}>
+          <Button 
+            type={liked ? "primary" : "default"} 
+            icon={liked ? <LikeFilled /> : <LikeOutlined />} 
+            onClick={handleLike}
+            loading={liking}
+            size="large"
+          >
+            {liked ? '已赞' : '点赞'} ({likeCount})
+          </Button>
         </div>
         
         <Divider orientation="left">
@@ -131,7 +178,7 @@ const PostDetailPage = () => {
                   <Space split="|">
                     <span>{comment.user?.username || '匿名用户'}</span>
                     <span style={{ fontSize: '12px', color: '#8c8c8c' }}>
-                      {new Date(comment.created_at).toLocaleString()}
+                      {new Date(comment.created_at).toLocaleString('zh-CN')}
                     </span>
                   </Space>
                 }

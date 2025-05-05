@@ -2,37 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { Typography, Row, Col, Card, Space, Button, Divider, Spin, message } from 'antd';
 import { ReadOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
-import { postAPI } from '../api'; // 引入 postAPI
+import { miscAPI } from '../api'; // 引入 miscAPI
+import PopularTagsCategories from '../components/PopularTagsCategories'; // 导入新组件
 import './HomePage.css'; // 引入自定义 CSS
 
 const { Title, Paragraph, Text } = Typography;
 
 const HomePage = () => {
-  const [latestPosts, setLatestPosts] = useState([]);
+  const [homeData, setHomeData] = useState({ latest_posts: [], hot_posts: [], hot_categories: [], hot_tags: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchLatestPosts = async () => {
+    const fetchHomePageData = async () => {
       try {
         setLoading(true);
-        // 获取最新的几篇文章，例如最新的3篇
-        const response = await postAPI.getAllPosts({ page: 1, limit: 3, sort: 'created_at', order: 'desc' });
-        if (response && response.data && Array.isArray(response.data.posts)) {
-          setLatestPosts(response.data.posts);
+        const response = await miscAPI.getHomePageData();
+        if (response && response.code === 200 && response.data) {
+          setHomeData(response.data);
         } else {
-          console.warn('获取最新文章数据结构不正确或为空:', response);
-          setLatestPosts([]); // 设置为空数组以避免渲染错误
+          console.warn('获取首页数据结构不正确或为空:', response);
+          setHomeData({ latest_posts: [], hot_posts: [], hot_categories: [], hot_tags: [] });
         }
       } catch (error) {
-        console.error('获取最新文章失败:', error);
-        message.error('加载最新文章失败');
-        setLatestPosts([]); // 出错时也设置为空数组
+        console.error('获取首页数据失败:', error);
+        message.error('加载首页数据失败');
+        setHomeData({ latest_posts: [], hot_posts: [], hot_categories: [], hot_tags: [] });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchLatestPosts();
+    fetchHomePageData();
   }, []);
 
   return (
@@ -52,15 +52,16 @@ const HomePage = () => {
 
       <Divider />
 
-      {/* Latest Posts Section */}
-      <Row justify="center" className="latest-posts-section">
-        <Col xs={24} lg={20} xl={18}>
-          <Title level={2} style={{ textAlign: 'center', marginBottom: '2rem' }}>最新文章</Title>
+      {/* Main Content Area */}
+      <Row justify="center" gutter={[24, 24]} style={{ padding: '0 24px' }}>
+        {/* Latest Posts Section */}
+        <Col xs={24} md={16} lg={18} className="latest-posts-section">
+          <Title level={2} style={{ marginBottom: '2rem' }}>最新文章</Title>
           <Spin spinning={loading}>
-            {latestPosts.length > 0 ? (
+            {homeData.latest_posts.length > 0 ? (
               <Row gutter={[24, 24]}>
-                {latestPosts.map(post => (
-                  <Col xs={24} sm={12} md={8} key={post.id}>
+                {homeData.latest_posts.map(post => (
+                  <Col xs={24} sm={12} xl={8} key={post.id}> {/* Adjusted grid for better layout */}
                     <Card
                       hoverable
                       className="post-card"
@@ -77,6 +78,12 @@ const HomePage = () => {
               !loading && <Paragraph style={{ textAlign: 'center' }}>暂无最新文章</Paragraph>
             )}
           </Spin>
+        </Col>
+
+        {/* Sidebar Section */}
+        <Col xs={24} md={8} lg={6}>
+          <PopularTagsCategories /> {/* 在侧边栏渲染热门标签和分类 */}
+          {/* 可以添加其他侧边栏内容，例如热门文章 */}
         </Col>
       </Row>
     </div>
