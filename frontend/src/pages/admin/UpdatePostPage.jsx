@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Select, message, Typography, Card, Space, Divider, Spin } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
-import { postAPI } from '../../api';
+import { postAPI, categoryAPI, tagAPI } from '../../api'; // Import categoryAPI and tagAPI
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -11,38 +11,44 @@ const UpdatePostPage = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
+  const [categories, setCategories] = useState([]); // State for categories
+  const [tags, setTags] = useState([]); // State for tags
+  const [dataLoading, setDataLoading] = useState(true); // Loading state for categories/tags
   const navigate = useNavigate();
   const { id } = useParams();
 
   // 这里应该从API获取分类和标签列表
-  const categories = [
-    { id: 1, name: '技术' },
-    { id: 2, name: '生活' },
-    { id: 3, name: '思考' },
-  ];
+  // const categories = [
+  //   { id: 1, name: '技术' },
+  //   { id: 2, name: '生活' },
+  //   { id: 3, name: '思考' },
+  // ];
 
-  const tags = [
-    { id: 1, name: 'React' },
-    { id: 2, name: 'JavaScript' },
-    { id: 3, name: '前端' },
-    { id: 4, name: '后端' },
-  ];
+  // const tags = [
+  //   { id: 1, name: 'React' },
+  //   { id: 2, name: 'JavaScript' },
+  //   { id: 3, name: '前端' },
+  //   { id: 4, name: '后端' },
+  // ];
 
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchData = async () => {
+      if (!id) return;
+      setFetchLoading(true);
+      setDataLoading(true);
       try {
-        setFetchLoading(true);
-        const post = await postAPI.getPostById(id);
-        
-        // 确保post数据存在且格式正确
-        if (!post || typeof post !== 'object') {
+        // Fetch post, categories, and tags concurrently
+        const [postRes, categoriesRes, tagsRes] = await Promise.all([
+          postAPI.getPostById(id),
+          categoryAPI.getAllCategories(),
+          tagAPI.getAllTags()
+        ]);
+
+        // Process post data
+        if (!postRes || typeof postRes !== 'object') {
           throw new Error('获取文章数据格式不正确');
         }
-        
-        // 处理可能的嵌套数据结构
-        const postData = post.data || post;
-        
-        // 设置表单初始值
+        const postData = postRes.data || postRes;
         form.setFieldsValue({
           title: postData.title || '',
           content: postData.content || '',
@@ -50,19 +56,60 @@ const UpdatePostPage = () => {
           categories: Array.isArray(postData.categories) ? postData.categories.map(c => c.id) : [],
           tags: Array.isArray(postData.tags) ? postData.tags.map(t => t.id) : []
         });
+
+        // Process categories and tags
+        setCategories(Array.isArray(categoriesRes) ? categoriesRes : (categoriesRes.data || []));
+        setTags(Array.isArray(tagsRes) ? tagsRes : (tagsRes.data || []));
+
       } catch (error) {
-        console.error('获取文章失败:', error);
-        message.error('获取文章失败，请稍后重试');
-        navigate('/admin');
+        console.error('获取文章或分类/标签失败:', error);
+        message.error('获取文章或分类/标签列表失败，请稍后重试');
+        // Optionally navigate away or show an error state
+        // navigate('/admin'); 
       } finally {
         setFetchLoading(false);
+        setDataLoading(false);
       }
     };
 
-    if (id) {
-      fetchPost();
-    }
+    fetchData();
   }, [id, form, navigate]);
+
+  // useEffect(() => {
+  //   const fetchPost = async () => {
+  //     try {
+  //       setFetchLoading(true);
+  //       const post = await postAPI.getPostById(id);
+        
+  //       // 确保post数据存在且格式正确
+  //       if (!post || typeof post !== 'object') {
+  //         throw new Error('获取文章数据格式不正确');
+  //       }
+        
+  //       // 处理可能的嵌套数据结构
+  //       const postData = post.data || post;
+        
+  //       // 设置表单初始值
+  //       form.setFieldsValue({
+  //         title: postData.title || '',
+  //         content: postData.content || '',
+  //         excerpt: postData.excerpt || '',
+  //         categories: Array.isArray(postData.categories) ? postData.categories.map(c => c.id) : [],
+  //         tags: Array.isArray(postData.tags) ? postData.tags.map(t => t.id) : []
+  //       });
+  //     } catch (error) {
+  //       console.error('获取文章失败:', error);
+  //       message.error('获取文章失败，请稍后重试');
+  //       navigate('/admin');
+  //     } finally {
+  //       setFetchLoading(false);
+  //     }
+  //   };
+
+  //   if (id) {
+  //     fetchPost();
+  //   }
+  // }, [id, form, navigate]);
 
   const handleSubmit = async (values) => {
     try {
@@ -136,6 +183,11 @@ const UpdatePostPage = () => {
       <Card>
         <Title level={2}>编辑文章</Title>
         <Divider />
+        {fetchLoading || dataLoading ? (
+          <div style={{ textAlign: 'center', padding: '50px' }}>
+            <Spin size="large" tip={fetchLoading ? "加载文章中..." : "加载分类和标签..."} />
+          </div>
+        ) : (
         <Form
           form={form}
           layout="vertical"
@@ -179,6 +231,8 @@ const UpdatePostPage = () => {
               mode="multiple"
               placeholder="请选择文章分类"
               style={{ width: '100%' }}
+              loading={dataLoading} // Add loading state
+              disabled={dataLoading} // Disable while loading
             >
               {categories.map(category => (
                 <Option key={category.id} value={category.id}>{category.name}</Option>
@@ -194,6 +248,8 @@ const UpdatePostPage = () => {
               mode="multiple"
               placeholder="请选择文章标签"
               style={{ width: '100%' }}
+              loading={dataLoading} // Add loading state
+              disabled={dataLoading} // Disable while loading
             >
               {tags.map(tag => (
                 <Option key={tag.id} value={tag.id}>{tag.name}</Option>
@@ -212,6 +268,7 @@ const UpdatePostPage = () => {
             </Space>
           </Form.Item>
         </Form>
+        )}
       </Card>
     </div>
   );
