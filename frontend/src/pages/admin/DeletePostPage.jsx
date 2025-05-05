@@ -97,9 +97,13 @@ const DeletePostPage = () => {
     },
     {
       title: '发布日期',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (text) => new Date(text).toLocaleDateString('zh-CN'),
+      dataIndex: 'created_at', // Corrected dataIndex from 'createdAt' to 'created_at'
+      key: 'created_at', // Also update key for consistency
+      render: (text) => {
+        if (!text) return '无日期'; // Handle null or undefined dates
+        const date = new Date(text);
+        return isNaN(date.getTime()) ? '无效日期' : date.toLocaleDateString('zh-CN'); // Check for invalid date after parsing
+      },
     },
     {
       title: '操作',

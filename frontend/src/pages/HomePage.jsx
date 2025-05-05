@@ -1,17 +1,39 @@
-import { Typography, Row, Col, Card, Space, Button, Divider } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Typography, Row, Col, Card, Space, Button, Divider, Spin, message } from 'antd';
 import { ReadOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
+import { postAPI } from '../api'; // 引入 postAPI
 import './HomePage.css'; // 引入自定义 CSS
 
 const { Title, Paragraph, Text } = Typography;
 
 const HomePage = () => {
-  // 这里将来会从API获取最新文章
-  const latestPosts = [
-    { id: 1, title: '欢迎来到我的博客', summary: '这是我的第一篇博客文章，介绍了这个网站的功能和特点。', createdAt: '2023-05-01' },
-    { id: 2, title: 'React 18新特性解析', summary: '深入探讨React 18带来的新特性和改进，以及如何在项目中应用。', createdAt: '2023-05-15' },
-    { id: 3, title: '前端性能优化技巧', summary: '分享一些实用的前端性能优化方法，帮助你的网站加载更快、运行更流畅。', createdAt: '2023-06-01' },
-  ];
+  const [latestPosts, setLatestPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLatestPosts = async () => {
+      try {
+        setLoading(true);
+        // 获取最新的几篇文章，例如最新的3篇
+        const response = await postAPI.getAllPosts({ page: 1, limit: 3, sort: 'created_at', order: 'desc' });
+        if (response && response.data && Array.isArray(response.data.posts)) {
+          setLatestPosts(response.data.posts);
+        } else {
+          console.warn('获取最新文章数据结构不正确或为空:', response);
+          setLatestPosts([]); // 设置为空数组以避免渲染错误
+        }
+      } catch (error) {
+        console.error('获取最新文章失败:', error);
+        message.error('加载最新文章失败');
+        setLatestPosts([]); // 出错时也设置为空数组
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLatestPosts();
+  }, []);
 
   return (
     <div className="home-page-container">
@@ -34,21 +56,27 @@ const HomePage = () => {
       <Row justify="center" className="latest-posts-section">
         <Col xs={24} lg={20} xl={18}>
           <Title level={2} style={{ textAlign: 'center', marginBottom: '2rem' }}>最新文章</Title>
-          <Row gutter={[24, 24]}>
-            {latestPosts.map(post => (
-              <Col xs={24} sm={12} md={8} key={post.id}>
-                <Card
-                  hoverable
-                  className="post-card"
-                  title={<Link to={`/posts/${post.id}`} className="post-card-title">{post.title}</Link>}
-                  extra={<Link to={`/posts/${post.id}`}>阅读更多</Link>}
-                >
-                  <Paragraph ellipsis={{ rows: 3 }} className="post-card-summary">{post.summary}</Paragraph>
-                  <Text type="secondary">发布于: {post.createdAt}</Text>
-                </Card>
-              </Col>
-            ))}
-          </Row>
+          <Spin spinning={loading}>
+            {latestPosts.length > 0 ? (
+              <Row gutter={[24, 24]}>
+                {latestPosts.map(post => (
+                  <Col xs={24} sm={12} md={8} key={post.id}>
+                    <Card
+                      hoverable
+                      className="post-card"
+                      title={<Link to={`/posts/${post.id}`} className="post-card-title">{post.title}</Link>}
+                      extra={<Link to={`/posts/${post.id}`}>阅读更多</Link>}
+                    >
+                      <Paragraph ellipsis={{ rows: 3 }} className="post-card-summary">{post.excerpt || post.summary /* 优先使用 excerpt */}</Paragraph>
+                      <Text type="secondary">发布于: {new Date(post.created_at).toLocaleDateString('zh-CN')}</Text>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            ) : (
+              !loading && <Paragraph style={{ textAlign: 'center' }}>暂无最新文章</Paragraph>
+            )}
+          </Spin>
         </Col>
       </Row>
     </div>

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { List, Card, Typography, Tag, Space, Input, Spin, Empty, Pagination } from 'antd';
+import { List, Card, Typography, Tag, Space, Input, Spin, Empty, Pagination, message } from 'antd'; // 引入 message
 import { SearchOutlined, CalendarOutlined, UserOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
+import { postAPI } from '../api'; // 引入 postAPI
 
 const { Title, Paragraph } = Typography;
 const { Search } = Input;
@@ -16,60 +17,37 @@ const PostListPage = () => {
     total: 0
   });
 
-  // 模拟文章数据，将来会从API获取
-  const mockPosts = [
-    { 
-      id: 1, 
-      title: '欢迎来到我的博客', 
-      summary: '这是我的第一篇博客文章，介绍了这个网站的功能和特点。', 
-      content: '详细内容...', 
-      author: 'Alvin',
-      createdAt: '2023-05-01',
-      tags: ['介绍', '欢迎']
-    },
-    { 
-      id: 2, 
-      title: 'React 18新特性解析', 
-      summary: '深入探讨React 18带来的新特性和改进，以及如何在项目中应用。', 
-      content: '详细内容...', 
-      author: 'Alvin',
-      createdAt: '2023-05-15',
-      tags: ['React', '前端', '技术']
-    },
-    { 
-      id: 3, 
-      title: '前端性能优化技巧', 
-      summary: '分享一些实用的前端性能优化方法，帮助你的网站加载更快、运行更流畅。', 
-      content: '详细内容...', 
-      author: 'Alvin',
-      createdAt: '2023-06-01',
-      tags: ['性能优化', '前端', '技术']
-    },
-  ];
+  // 移除 mockPosts
+  // const mockPosts = [...];
 
   useEffect(() => {
-    // 模拟API请求
     const fetchPosts = async () => {
       setLoading(true);
       try {
-        // 这里将来会调用实际的API
-        // const response = await postAPI.getAllPosts({
-        //   page: pagination.current,
-        //   pageSize: pagination.pageSize,
-        //   search: searchText
-        // });
-        
-        // 模拟API响应
-        setTimeout(() => {
-          setPosts(mockPosts);
+        // 调用实际的API获取文章列表
+        const response = await postAPI.getAllPosts({
+          page: pagination.current,
+          limit: pagination.pageSize, // 使用 limit 替代 pageSize
+          search: searchText
+        });
+
+        if (response && response.data && Array.isArray(response.data.posts)) {
+          setPosts(response.data.posts);
           setPagination(prev => ({
             ...prev,
-            total: mockPosts.length
+            total: response.data.total || 0 // 使用后端返回的总数
           }));
-          setLoading(false);
-        }, 500);
+        } else {
+          console.warn('获取文章列表数据结构不正确或为空:', response);
+          setPosts([]);
+          setPagination(prev => ({ ...prev, total: 0 }));
+        }
       } catch (error) {
         console.error('获取文章列表失败:', error);
+        message.error('加载文章列表失败'); // 添加错误提示
+        setPosts([]);
+        setPagination(prev => ({ ...prev, total: 0 }));
+      } finally {
         setLoading(false);
       }
     };
@@ -79,7 +57,7 @@ const PostListPage = () => {
 
   const handleSearch = (value) => {
     setSearchText(value);
-    setPagination(prev => ({ ...prev, current: 1 }));
+    setPagination(prev => ({ ...prev, current: 1 })); // 搜索时回到第一页
   };
 
   const handlePageChange = (page, pageSize) => {
@@ -89,7 +67,7 @@ const PostListPage = () => {
   return (
     <div style={{ padding: '24px' }}>
       <Title level={2}>博客文章</Title>
-      
+
       <div style={{ marginBottom: '24px' }}>
         <Search
           placeholder="搜索文章"
@@ -100,7 +78,7 @@ const PostListPage = () => {
           style={{ maxWidth: '500px' }}
         />
       </div>
-      
+
       <Spin spinning={loading}>
         {posts.length > 0 ? (
           <List
@@ -108,43 +86,47 @@ const PostListPage = () => {
             dataSource={posts}
             renderItem={(post) => (
               <List.Item>
-                <Card 
+                <Card
                   hoverable
                   title={
-                    <Link to={`/posts/${post.id}`}>
+                    <Link to={`/posts/${post.id}`} style={{ display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {post.title}
                     </Link>
                   }
+                  style={{ height: '100%' }}
+                  bodyStyle={{ height: 'calc(100% - 56px)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
                 >
-                  <Paragraph ellipsis={{ rows: 3 }}>
-                    {post.summary}
-                  </Paragraph>
-                  
-                  <Space direction="vertical" style={{ width: '100%' }}>
-                    <Space wrap>
-                      {post.tags.map(tag => (
-                        <Tag key={tag} color="blue">{tag}</Tag>
+                  <div>
+                    <Paragraph ellipsis={{ rows: 3 }} style={{ marginBottom: '16px' }}>
+                      {post.excerpt || post.summary /* 优先使用 excerpt */} 
+                    </Paragraph>
+                  </div>
+
+                  <div>
+                    <Space wrap style={{ marginBottom: '8px' }}>
+                      {/* 假设 post.tags 是存在的，如果不存在需要处理 */} 
+                      {post.tags && post.tags.map(tag => (
+                        <Tag key={tag.id || tag.name} color="blue">{tag.name}</Tag> // 使用 tag.name
                       ))}
                     </Space>
-                    
-                    <Space split="|">  
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'rgba(0, 0, 0, 0.45)', fontSize: '12px' }}>
                       <span>
-                        <CalendarOutlined /> {post.createdAt}
+                        <CalendarOutlined style={{ marginRight: '4px' }} /> {new Date(post.created_at).toLocaleDateString('zh-CN')} {/* 格式化日期 */}
                       </span>
                       <span>
-                        <UserOutlined /> {post.author}
+                        <UserOutlined style={{ marginRight: '4px' }} /> {post.author?.username || '未知作者'} {/* 处理 author 可能不存在的情况 */}
                       </span>
-                    </Space>
-                  </Space>
+                    </div>
+                  </div>
                 </Card>
               </List.Item>
             )}
           />
         ) : (
-          <Empty description="暂无文章" />
+          !loading && <Empty description="暂无文章" /> // 只有在非加载状态下显示 Empty
         )}
-        
-        {posts.length > 0 && (
+
+        {pagination.total > 0 && ( // 只有在有数据时显示分页
           <div style={{ textAlign: 'center', marginTop: '24px' }}>
             <Pagination
               current={pagination.current}

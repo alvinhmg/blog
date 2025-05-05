@@ -64,7 +64,7 @@ export const postAPI = {
   updatePost: (id, postData) => api.put(`/posts/${id}`, postData),
   deletePost: (id) => api.delete(`/posts/${id}`),
   // 评论相关API
-  addComment: (postId, content) => api.post(`/posts/${postId}/comments`, { content }),
+  addComment: (postId, content) => api.post(`/comments/post/${postId}`, { content }), // Corrected path
   getComments: (postId) => api.get(`/posts/${postId}/comments`),
   deleteComment: (commentId) => api.delete(`/comments/${commentId}`),
 };
