@@ -42,8 +42,17 @@ export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),
   getCurrentUser: () => api.get('/auth/user'),
   logout: () => {
-    localStorage.removeItem('token');
-    return Promise.resolve();
+    // 先调用后端登出接口，然后清除本地存储的token
+    return api.post('/auth/logout')
+      .then(response => {
+        localStorage.removeItem('token');
+        return response;
+      })
+      .catch(error => {
+        // 即使后端请求失败，也清除本地token
+        localStorage.removeItem('token');
+        return Promise.reject(error);
+      });
   },
 };
 

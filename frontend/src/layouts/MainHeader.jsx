@@ -1,9 +1,10 @@
-import { Layout, Menu, Button, Space } from 'antd';
+import { Layout, Menu, Button, Space, message } from 'antd'; // Import message
 import './MainHeader.css'; // 导入自定义样式
 import { UserOutlined, HomeOutlined, ReadOutlined, LoginOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux'; // Import useSelector and useDispatch
 import { logout } from '../store/authSlice'; // Import logout action
+import { authAPI } from '../api'; // Import authAPI
 
 const { Header } = Layout;
 
@@ -13,10 +14,21 @@ const MainHeader = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth); // Get user and isAuthenticated from Redux store
   const isAdmin = user?.role === 'admin'; // Check if user has admin role
 
-  const handleLogout = () => {
-    dispatch(logout()); // Dispatch logout action
-    console.log('用户登出');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      // Call backend logout API first
+      await authAPI.logout(); 
+      // Then dispatch frontend logout action
+      dispatch(logout()); 
+      message.success('登出成功');
+      navigate('/login');
+    } catch (error) {
+      console.error('登出失败:', error);
+      message.error(error.response?.data?.message || '登出操作失败，请稍后重试');
+      // Optionally, still perform frontend logout even if backend call fails
+      // dispatch(logout());
+      // navigate('/login');
+    }
   };
 
   // No need for loading state from context anymore

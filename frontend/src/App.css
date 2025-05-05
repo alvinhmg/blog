@@ -40,3 +40,25 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Add styles for App Layout */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensure layout takes full viewport height */
+}
+
+.main-content {
+  flex: 1; /* Allow content to grow and push footer down */
+  /* Remove default padding/margin if they interfere */
+  padding: 20px; /* Example padding, adjust as needed */
+  background-color: #fff; /* Set a background color if needed */
+}
+
+/* Reset default #root styles if they conflict */
+#root {
+  max-width: none; /* Remove max-width if full width is desired */
+  margin: 0;
+  padding: 0; /* Remove padding from root if layout handles it */
+  text-align: left; /* Reset text-align if needed */
+}
