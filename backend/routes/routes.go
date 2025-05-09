@@ -88,9 +88,10 @@ func registerTagRoutes(group *route.RouterGroup) {
 
 // 评论相关路由
 func registerCommentRoutes(group *route.RouterGroup) {
-	comments := group.Group("/comments", middleware.JWTAuth()) // 创建评论需要登录
+	comments := group.Group("/comments") // 评论相关路由
 
-	comments.POST("", api.AddComment) // 创建评论
+	// 创建评论 (需要登录)
+	comments.POST("/post/:postId", middleware.JWTAuth(), api.AddComment)
 	// comments.GET("", api.GetComments) // 获取评论列表 (通常在文章详情中获取)
 	// comments.GET("/:id", api.GetComment) // 获取单个评论详情
 	// comments.PUT("/:id", api.UpdateComment) // 更新评论 (通常不允许用户更新)

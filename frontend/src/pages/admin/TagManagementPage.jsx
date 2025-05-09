@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { message, Spin } from 'antd';
+import { message, Spin, Input, Button, List, Popconfirm, Card, Typography, Space } from 'antd';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { tagAPI } from '../../api';
+
+const { Title } = Typography;
 
 const TagManagementPage = () => {
   const [tags, setTags] = useState([]);
@@ -68,23 +71,42 @@ const TagManagementPage = () => {
   }
 
   return (
-    <div>
-      <h1>标签管理</h1>
-      <input
-        type="text"
-        value={newTag}
-        onChange={(e) => setNewTag(e.target.value)}
-        placeholder="新标签名称"
-      />
-      <button onClick={handleAddTag}>添加标签</button>
-      <ul>
-        {Array.isArray(tags) && tags.map(tag => (
-          <li key={tag.id}>
-            {tag.name}
-            <button onClick={() => handleDeleteTag(tag.id)}>删除</button>
-          </li>
-        ))}
-      </ul>
+    <div style={{ padding: '20px' }}>
+      <Card>
+        <Title level={2}>标签管理</Title>
+        <Space style={{ marginBottom: 16 }}>
+          <Input
+            placeholder="新标签名称"
+            value={newTag}
+            onChange={(e) => setNewTag(e.target.value)}
+            onPressEnter={handleAddTag}
+            style={{ width: 200 }}
+          />
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAddTag}>
+            添加标签
+          </Button>
+        </Space>
+        <List
+          bordered
+          dataSource={tags}
+          renderItem={item => (
+            <List.Item
+              actions={[
+                <Popconfirm
+                  title="确定要删除这个标签吗？"
+                  onConfirm={() => handleDeleteTag(item.id)}
+                  okText="确定"
+                  cancelText="取消"
+                >
+                  <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
+                </Popconfirm>
+              ]}
+            >
+              {item.name}
+            </List.Item>
+          )}
+        />
+      </Card>
     </div>
   );
 };

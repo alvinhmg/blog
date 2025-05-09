@@ -75,21 +75,19 @@ const PostDetailPage = () => {
   const handleLike = async () => {
     setLiking(true);
     try {
-      // TODO: Implement actual API call for liking/unliking
-      // const response = await postAPI.toggleLikePost(id);
-      // if (response.code === 200) {
-      //   setLiked(!liked);
-      //   setLikeCount(liked ? likeCount - 1 : likeCount + 1);
-      //   message.success(liked ? '取消点赞成功' : '点赞成功');
-      // } else {
-      //   message.error('操作失败');
-      // }
-
-      // Placeholder logic:
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
-      setLiked(!liked);
-      setLikeCount(liked ? likeCount - 1 : likeCount + 1);
-      message.success(liked ? '取消点赞成功 (模拟)' : '点赞成功 (模拟)');
+      // 调用实际的点赞API
+      const response = await postAPI.likePost(id);
+      if (response.code === 200 && response.data) {
+        // 假设后端返回更新后的点赞数
+        const newLikeCount = response.data.like_count;
+        // 注意：后端目前只增加点赞，没有取消点赞逻辑，所以前端暂时只处理点赞成功的情况
+        // 理想情况下，后端应返回用户是否已点赞的状态，或者前端自行管理
+        setLiked(true); // 假设点赞成功后状态变为已赞
+        setLikeCount(newLikeCount);
+        message.success('点赞成功');
+      } else {
+        message.error(response.message || '点赞失败');
+      }
 
     } catch (error) {
       console.error('点赞/取消点赞失败:', error);

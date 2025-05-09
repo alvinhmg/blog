@@ -58,11 +58,13 @@ export const authAPI = {
 
 // 文章相关API
 export const postAPI = {
+  searchPosts: (params) => api.get('/posts/search', { params }), // 添加搜索接口调用
   getAllPosts: (params) => api.get('/posts', { params }),
   getPostById: (id) => api.get(`/posts/${id}`),
   createPost: (postData) => api.post('/posts', postData),
   updatePost: (id, postData) => api.put(`/posts/${id}`, postData),
   deletePost: (id) => api.delete(`/posts/${id}`),
+  likePost: (id) => api.post(`/posts/${id}/like`), // 添加点赞接口
   // 评论相关API
   addComment: (postId, content) => api.post(`/comments/post/${postId}`, { content }), // Corrected path
   getComments: (postId) => api.get(`/posts/${postId}/comments`),

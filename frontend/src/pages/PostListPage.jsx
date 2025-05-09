@@ -24,12 +24,20 @@ const PostListPage = () => {
     const fetchPosts = async () => {
       setLoading(true);
       try {
-        // 调用实际的API获取文章列表
-        const response = await postAPI.getAllPosts({
-          page: pagination.current,
-          limit: pagination.pageSize, // 使用 limit 替代 pageSize
-          search: searchText
-        });
+        // 根据是否有搜索文本决定调用哪个API
+        let response;
+        if (searchText) {
+          response = await postAPI.searchPosts({
+            q: searchText,
+            page: pagination.current,
+            page_size: pagination.pageSize // 后端 SearchPosts 使用 page_size
+          });
+        } else {
+          response = await postAPI.getAllPosts({
+            page: pagination.current,
+            page_size: pagination.pageSize // 后端 GetPosts 使用 page_size
+          });
+        }
 
         if (response && response.data && Array.isArray(response.data.posts)) {
           setPosts(response.data.posts);

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { message, Spin } from 'antd';
+import { message, Spin, Input, Button, List, Popconfirm, Card, Typography, Space } from 'antd';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { categoryAPI } from '../../api';
+
+const { Title } = Typography;
 
 const CategoryManagementPage = () => {
   const [categories, setCategories] = useState([]);
@@ -68,23 +71,42 @@ const CategoryManagementPage = () => {
   }
 
   return (
-    <div>
-      <h1>分类管理</h1>
-      <input
-        type="text"
-        value={newCategory}
-        onChange={(e) => setNewCategory(e.target.value)}
-        placeholder="新分类名称"
-      />
-      <button onClick={handleAddCategory}>添加分类</button>
-      <ul>
-        {Array.isArray(categories) && categories.map(category => (
-          <li key={category.id}>
-            {category.name}
-            <button onClick={() => handleDeleteCategory(category.id)}>删除</button>
-          </li>
-        ))}
-      </ul>
+    <div style={{ padding: '20px' }}>
+      <Card>
+        <Title level={2}>分类管理</Title>
+        <Space style={{ marginBottom: 16 }}>
+          <Input
+            placeholder="新分类名称"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            onPressEnter={handleAddCategory}
+            style={{ width: 200 }}
+          />
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAddCategory}>
+            添加分类
+          </Button>
+        </Space>
+        <List
+          bordered
+          dataSource={categories}
+          renderItem={item => (
+            <List.Item
+              actions={[
+                <Popconfirm
+                  title="确定要删除这个分类吗？"
+                  onConfirm={() => handleDeleteCategory(item.id)}
+                  okText="确定"
+                  cancelText="取消"
+                >
+                  <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
+                </Popconfirm>
+              ]}
+            >
+              {item.name}
+            </List.Item>
+          )}
+        />
+      </Card>
     </div>
   );
 };

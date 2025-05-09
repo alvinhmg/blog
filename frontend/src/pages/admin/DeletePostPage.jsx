@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Space, Popconfirm, message, Typography, Card, Divider } from 'antd';
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { Table, Button, message, Popconfirm, Input, Typography, Space, Card, Divider } from 'antd'; // 添加 Typography, Space, Card, Divider
+import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'; // 添加图标导入
+import axios from 'axios';
+import { Link } from 'react-router-dom'; // 添加这行导入
 import { useNavigate } from 'react-router-dom';
 import { postAPI } from '../../api';
 
@@ -88,7 +90,7 @@ const DeletePostPage = () => {
       title: '标题',
       dataIndex: 'title',
       key: 'title',
-      render: (text, record) => <a href={`/posts/${record.id}`} target="_blank" rel="noopener noreferrer">{text}</a>,
+      render: (text, record) => <Link to={`/posts/${record.id}`}>{text}</Link>,
     },
     {
       title: '作者',
@@ -113,7 +115,7 @@ const DeletePostPage = () => {
           <Button 
             icon={<EyeOutlined />} 
             size="small"
-            onClick={() => window.open(`/posts/${record.id}`, '_blank')}
+            onClick={() => navigate(`/posts/${record.id}`)} // 使用 navigate 进行跳转
           >
             查看
           </Button>

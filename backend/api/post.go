@@ -155,9 +155,9 @@ func SearchPosts(c context.Context, ctx *app.RequestContext) {
 
 	db := config.DB.Model(&models.Post{}).Preload("Author").Preload("Categories").Preload("Tags")
 
-	// 在标题和内容中搜索
+	// 在标题和内容中进行不区分大小写的模糊搜索
 	searchQuery := "%" + query + "%"
-	db = db.Where("title LIKE ? OR content LIKE ?", searchQuery, searchQuery)
+	db = db.Where("LOWER(title) LIKE LOWER(?) OR LOWER(content) LIKE LOWER(?) ", searchQuery, searchQuery)
 
 	// 计算总数
 	db.Count(&total)
