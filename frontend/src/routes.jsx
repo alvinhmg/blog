@@ -12,6 +12,8 @@ import UpdatePostPage from './pages/admin/UpdatePostPage';
 import DeletePostPage from './pages/admin/DeletePostPage';
 import CategoryManagementPage from './pages/admin/CategoryManagementPage';
 import TagManagementPage from './pages/admin/TagManagementPage';
+import CategoryPostsPage from './pages/CategoryPostsPage'; // 新增：分类文章列表页面
+import TagPostsPage from './pages/TagPostsPage'; // 新增：标签文章列表页面
 
 const router = createBrowserRouter([
   {
@@ -30,6 +32,8 @@ const router = createBrowserRouter([
       { path: 'admin/delete-post', element: <DeletePostPage /> },
       { path: 'admin/category-management', element: <CategoryManagementPage /> },
       { path: 'admin/tag-management', element: <TagManagementPage /> },
+      { path: 'categories/:id', element: <CategoryPostsPage /> }, // 新增：分类文章路由
+      { path: 'tags/:id', element: <TagPostsPage /> }, // 新增：标签文章路由
     ],
   },
 ]);

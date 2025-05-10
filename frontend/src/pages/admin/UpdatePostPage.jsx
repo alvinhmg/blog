@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Select, message, Typography, Card, Space, Divider, Spin } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
+import MDEditor from '@uiw/react-md-editor';
+
+
 import { postAPI, categoryAPI, tagAPI } from '../../api'; // Import categoryAPI and tagAPI
 
 const { Title } = Typography;
@@ -217,9 +220,11 @@ const UpdatePostPage = () => {
             label="文章内容"
             rules={[{ required: true, message: '请输入文章内容' }]}
           >
-            <TextArea 
-              placeholder="请输入文章内容，支持Markdown格式" 
-              autoSize={{ minRows: 10, maxRows: 20 }}
+            <MDEditor
+              height={400}
+              data-color-mode="light" // Ensure light theme is applied
+              previewOptions={{
+              }}
             />
           </Form.Item>
 

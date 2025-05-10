@@ -69,6 +69,8 @@ export const postAPI = {
   addComment: (postId, content) => api.post(`/comments/post/${postId}`, { content }), // Corrected path
   getComments: (postId) => api.get(`/posts/${postId}/comments`),
   deleteComment: (commentId) => api.delete(`/comments/${commentId}`),
+  getPostsByCategory: (categoryId, params) => api.get('/posts', { params: { ...params, category_id: categoryId } }), // 修改：根据分类ID获取文章
+  getPostsByTag: (tagId, params) => api.get('/posts', { params: { ...params, tag_id: tagId } }), // 修改：根据标签ID获取文章
 };
 
 // 分类相关API
