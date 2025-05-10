@@ -5,6 +5,18 @@ import { categoryAPI } from '../../api';
 
 const { Title } = Typography;
 
+// 简单的 slug 生成函数
+const slugify = (text) => {
+  if (!text) return '';
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-') // Replace spaces with -
+    .replace(/[^\w-]+/g, '') // Remove all non-word chars
+    .replace(/--+/g, '-'); // Replace multiple - with single -
+};
+
 const CategoryManagementPage = () => {
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
@@ -35,9 +47,16 @@ const CategoryManagementPage = () => {
       return;
     }
     
+    const categorySlug = slugify(newCategory);
+    if (!categorySlug) {
+      message.warning('无法为分类名称生成有效的Slug');
+      return;
+    }
+
     try {
-      const response = await categoryAPI.createCategory({ name: newCategory });
-      if (response.success || response.code === 200) {
+      // 同时发送 name 和 slug
+      const response = await categoryAPI.createCategory({ name: newCategory, slug: categorySlug });
+      if (response.success || response.code === 201 || response.code === 200) { // code 201 for created
         const newCategoryData = response.category || response.data;
         setCategories(prev => Array.isArray(prev) ? [...prev, newCategoryData] : [newCategoryData]);
         setNewCategory('');

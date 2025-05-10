@@ -84,7 +84,9 @@ const TagPostsPage = () => {
               <List.Item
                 key={post.id}
                 actions={[
-                  <Text type="secondary">发布于: {new Date(post.createdAt).toLocaleDateString()}</Text>,
+                  <Text type="secondary">
+                    发布于: {post.created_at ? new Date(post.created_at).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }) : '未知日期'}
+                  </Text>,
                 ]}
                 extra={post.cover_image_url && <img width={272} alt="logo" src={post.cover_image_url} />}
               >

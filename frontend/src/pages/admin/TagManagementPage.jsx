@@ -5,6 +5,18 @@ import { tagAPI } from '../../api';
 
 const { Title } = Typography;
 
+// 简单的 slug 生成函数 (可以考虑提取到公共 utils 文件)
+const slugify = (text) => {
+  if (!text) return '';
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-') // Replace spaces with -
+    .replace(/[^\w-]+/g, '') // Remove all non-word chars
+    .replace(/--+/g, '-'); // Replace multiple - with single -
+};
+
 const TagManagementPage = () => {
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState('');
@@ -35,9 +47,16 @@ const TagManagementPage = () => {
       return;
     }
     
+    const tagSlug = slugify(newTag);
+    if (!tagSlug) {
+      message.warning('无法为标签名称生成有效的Slug');
+      return;
+    }
+
     try {
-      const response = await tagAPI.createTag({ name: newTag });
-      if (response.success || response.code === 200) {
+      // 同时发送 name 和 slug
+      const response = await tagAPI.createTag({ name: newTag, slug: tagSlug });
+      if (response.success || response.code === 201 || response.code === 200) { // code 201 for created
         const newTagData = response.tag || response.data;
         setTags(prev => Array.isArray(prev) ? [...prev, newTagData] : [newTagData]);
         setNewTag('');
