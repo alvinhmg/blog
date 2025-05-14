@@ -25,7 +25,19 @@
   margin-left: auto; /* Push the login button to the right */
 }
 
-/* Remove shadow from the primary login button in the header */
+/* 优化登录按钮样式 */
 .header .ant-space .ant-btn-primary {
-  box-shadow: none;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.header .ant-space .ant-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.3);
+}
+
+.header .ant-space .ant-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
 }

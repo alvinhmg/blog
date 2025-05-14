@@ -5,6 +5,7 @@ import { setCredentials } from '../store/authSlice';
 import { Button, Form, Input, message, Card, Typography, Divider } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { authAPI } from '../api';
+import './Login.css';
 
 const { Title, Paragraph } = Typography;
 
@@ -35,15 +36,18 @@ const Login = () => {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '40px auto', padding: '0 16px' }}>
-      <Card bordered={false} style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
-        <Title level={2} style={{ textAlign: 'center' }}>用户登录</Title>
-        <Form
-          name="login"
-          onFinish={onFinish}
-          layout="vertical"
-          autoComplete="off"
-        >
+    <>
+      <div className="login-page-background"></div>
+      <div className="login-container">
+        <Card bordered={false} className="login-card">
+          <Title level={2} className="login-title">用户登录</Title>
+          <Form
+            name="login"
+            onFinish={onFinish}
+            layout="vertical"
+            autoComplete="off"
+            className="login-form"
+          >
           <Form.Item
             name="username"
             rules={[{ required: true, message: '请输入用户名!' }]}
@@ -63,19 +67,28 @@ const Login = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block size="large">
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              loading={loading} 
+              block 
+              size="large"
+              className="login-button"
+            >
               登录
             </Button>
           </Form.Item>
           
-          <Divider plain>或者</Divider>
+          <Divider plain className="login-divider">或者</Divider>
           
-          <Paragraph style={{ textAlign: 'center' }}>
+          <Paragraph className="register-link">
             还没有账号？ <Link to="/register">立即注册</Link>
           </Paragraph>
         </Form>
       </Card>
     </div>
+    </>
+
   );
 };
 
