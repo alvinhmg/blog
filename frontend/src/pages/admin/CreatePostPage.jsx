@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Select, message, Typography, Card, Space, Divider, Spin } from 'antd';
+import { Form, Input, Button, Select, message, Typography, Card, Space, Divider, Spin, Upload, Modal } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { UploadOutlined, PlusOutlined } from '@ant-design/icons';
 import MDEditor from '@uiw/react-md-editor';
 import '@uiw/react-md-editor/markdown-editor.css';
 
-import { postAPI, categoryAPI, tagAPI } from '../../api';
+import { postAPI, categoryAPI, tagAPI, uploadAPI } from '../../api';
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -16,6 +17,11 @@ const CreatePostPage = () => {
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
+  const [imageUrl, setImageUrl] = useState('');
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewImage, setPreviewImage] = useState('');
+  const [fileList, setFileList] = useState([]);
+  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,6 +61,70 @@ const CreatePostPage = () => {
   //   { id: 4, name: '后端' },
   // ];
 
+  // 处理图片预览
+  const handlePreview = async (file) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+    setPreviewImage(file.url || file.preview);
+    setPreviewVisible(true);
+  };
+
+  // 处理图片上传状态变化
+  const handleChange = ({ fileList }) => setFileList(fileList);
+
+  // 关闭预览
+  const handleCancel = () => setPreviewVisible(false);
+
+  // 将文件转换为Base64以便预览
+  const getBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  // 处理图片上传
+  const handleUpload = async (options) => {
+    const { onSuccess, onError, file, onProgress } = options;
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    setUploading(true);
+    
+    try {
+      const response = await uploadAPI.uploadImage(formData);
+      setImageUrl(response.data.url);
+      onSuccess(response, file);
+      message.success('图片上传成功');
+      
+      // 将图片URL插入到Markdown编辑器中
+      const content = form.getFieldValue('content') || '';
+      const imageMarkdown = `\n![图片](${response.data.url})\n`;
+      form.setFieldsValue({
+        content: content + imageMarkdown
+      });
+      
+    } catch (error) {
+      console.error('上传图片失败:', error);
+      message.error('上传图片失败，请稍后重试');
+      onError(error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // 上传按钮
+  const uploadButton = (
+    <div>
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>上传</div>
+    </div>
+  );
+
   const handleSubmit = async (values) => {
     try {
       setLoading(true);
@@ -66,6 +136,7 @@ const CreatePostPage = () => {
         status: 'published',
         categories: values.categories,
         tags: values.tags,
+        cover_image: imageUrl, // 添加封面图片URL
       };
 
       const response = await postAPI.createPost(postData);
@@ -124,6 +195,43 @@ const CreatePostPage = () => {
                 data-color-mode="light" // Ensure light theme is applied
                 previewOptions={{
                 }}
+              />
+            </Form.Item>
+            
+            <Form.Item
+              label="上传图片"
+              extra="支持jpg、jpeg、png、gif、webp格式，上传后会自动插入到文章内容中"
+            >
+              <Upload
+                name="image"
+                listType="picture-card"
+                fileList={fileList}
+                onPreview={handlePreview}
+                onChange={handleChange}
+                customRequest={handleUpload}
+                accept=".jpg,.jpeg,.png,.gif,.webp"
+              >
+                {fileList.length >= 8 ? null : uploadButton}
+              </Upload>
+              <Modal
+                open={previewVisible}
+                title="图片预览"
+                footer={null}
+                onCancel={handleCancel}
+              >
+                <img alt="预览图片" style={{ width: '100%' }} src={previewImage} />
+              </Modal>
+            </Form.Item>
+            
+            <Form.Item
+              name="cover_image"
+              label="封面图片"
+              extra="可以从上传的图片中选择一张作为封面图片"
+            >
+              <Input 
+                placeholder="图片URL" 
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
               />
             </Form.Item>
 

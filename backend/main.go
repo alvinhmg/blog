@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/alvinhmg/blog/config"
+	"github.com/alvinhmg/blog/middleware"
 	"github.com/alvinhmg/blog/routes"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
@@ -42,8 +43,12 @@ func main() {
 	// 创建Hertz服务器实例
 	h := server.Default(
 		server.WithHostPorts(":8080"),
+		server.WithMaxRequestBodySize(20<<20), // 设置最大请求体为20MB
 	)
 	h.Use(corsMiddleware())
+
+	// 注册静态文件服务中间件
+	middleware.RegisterStaticFileServer(h)
 
 	// 注册路由
 	routes.RegisterRoutes(h)

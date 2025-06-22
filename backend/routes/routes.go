@@ -103,8 +103,12 @@ func registerCommentRoutes(group *route.RouterGroup) {
 	// adminComments.PUT("/:id/reject", api.RejectComment)   // TODO: 实现拒绝评论功能
 }
 
-// 杂项路由 (首页数据、归档等)
+// 杂项相关路由
 func registerMiscRoutes(group *route.RouterGroup) {
-	group.GET("/home", api.GetHomePageData)   // 获取首页数据
-	group.GET("/archive", api.GetArchiveData) // 获取归档数据
+	misc := group.Group("/misc")
+	misc.GET("/home", api.GetHomePageData)   // 获取首页数据
+	misc.GET("/archive", api.GetArchiveData) // 获取归档数据
+
+	// 图片上传路由 (需要登录)
+	misc.POST("/upload/image", middleware.JWTAuth(), api.UploadImage) // 上传图片
 }

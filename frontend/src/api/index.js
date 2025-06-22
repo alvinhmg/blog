@@ -95,8 +95,12 @@ export const tagAPI = {
 
 // 杂项 API (首页、归档等)
 export const miscAPI = {
-  getHomePageData: () => api.get('/home'),
+  getHomePageData: () => api.get('/misc/home'),
   getArchiveData: () => api.get('/archive'),
 };
 
+// 文件上传相关API
+export { uploadAPI } from './upload';
+
+export { api }; // 导出api实例以便在upload.js中使用
 // export default api; // 通常不需要默认导出整个实例，除非有特殊用途
