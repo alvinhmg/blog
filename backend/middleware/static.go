@@ -12,8 +12,10 @@ import (
 // RegisterStaticFileServer 注册静态文件服务中间件
 func RegisterStaticFileServer(h *server.Hertz) {
 	// 为上传的图片文件提供静态文件服务
-	// 修改静态文件服务的路径映射，指向项目根目录
-	h.Static("/uploads", "..")
+	// 修改静态文件服务的路径映射，指向backend目录下的uploads文件夹
+	// 使用相对路径以便于项目部署到服务器
+	// 注意：路径映射应该是 /uploads -> .
+	h.Static("/uploads", ".")
 
 	// 添加中间件处理图片URL
 	h.Use(func(c context.Context, ctx *app.RequestContext) {

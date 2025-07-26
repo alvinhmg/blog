@@ -14,6 +14,10 @@ export default defineConfig({
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, '') // 如果后端接口没有 /api 前缀，取消注释此行
       },
+      '/uploads': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      }
     }
   }
 })
